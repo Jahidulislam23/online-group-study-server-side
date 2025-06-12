@@ -41,7 +41,7 @@ async function run() {
       const email = req.params.email;
       const query = { email };
       console.log(query);
-      const result = await assignmentCollection.find(query).toArray();
+      const result = await assignmentCollection.findOne(query).toArray();
       res.send(result);
     });
 
@@ -62,10 +62,22 @@ async function run() {
     app.put('/assignment/:id',async(req,res)=>{
         const id = req.params.id;
         const filter = {_id: new ObjectId(id)}
-        const updateTree = req.body;
+        const updateAss = req.body;
         const options = {upsert: true}
         const updateDoct ={
-            $set:updateTree
+            $set:updateAss
+        }
+        const result = await assignmentCollection.updateOne(filter,updateDoct,options)
+        res.send(result)
+    })
+    // viewDetailsAssignmentPage kico jak add kora
+    app.put('/viewAssignmentViewDetails/:id',async(req,res)=>{
+        const id = req.params.id;
+        const filter = {_id: new ObjectId(id)}
+        const updateAssignment = req.body;
+        const options = {upsert: true}
+        const updateDoct ={
+            $set:updateAssignment
         }
         const result = await assignmentCollection.updateOne(filter,updateDoct,options)
         res.send(result)
