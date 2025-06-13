@@ -15,6 +15,27 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+const logger = (req,res,next)=>{
+    console.log('inside the logger middleware')
+    next();
+}
+const verifyToken  =(req,res,next)=>{
+  const token =req?.cookies?.token;
+    console.log('cookies in the middleware',token);
+    if(!token){
+      return res.this.status(401).send({message:'unauthorized access'})
+    }
+    // verify
+    jwt.verify(token,process.env.JWT_ACCESS_SECRET,(error,decoded)=>{
+      if(error){
+        return res.status(401).send({message:'unauthorized access'})
+      }
+      req.decoded = decoded;
+      next();
+    })
+    
+}
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jgx1gaf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -31,6 +52,7 @@ async function run() {
 
     const assignmentUserCollection = client.db("assignmentDB").collection("users");
     const assignmentCollection = client.db("assignmentDB").collection("assignment");
+    const assignmentModal = client.db("assignmentDB").collection("assignmentModal");
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
@@ -47,6 +69,19 @@ async function run() {
         res.send({token})
     })
 
+    // modal er kaj
+    app.get("/assignmentModal", async (req, res) => {
+      const result = await assignmentModal.find().toArray();
+      res.send(result);
+    });
+
+    app.post("/assignmentModal", async (req, res) => {
+      const newAssignment = req.body;
+      console.log(newAssignment,"newAssignment");
+      const result = await assignmentModal.insertOne(newAssignment);
+      res.send(result);
+    });
+
     // my assignment ar kaj
     app.get("/assignments/:email", async (req, res) => {
       console.log(req.params.email);
@@ -57,10 +92,10 @@ async function run() {
       res.send(result);
     });
 
-    // app.get("/homeAssignment", async (req, res) => {
-    //   const result = await assignmentCollection.find().limit(6).toArray()
-    //   res.send(result);
-    // });
+    app.get("/homeAssignment", async (req, res) => {
+      const result = await assignmentCollection.find().limit(6).toArray()
+      res.send(result);
+    });
 
     //  assignment er delete er kaj
     app.delete('/assignment/:id', async (req,res) => {
@@ -95,9 +130,16 @@ async function run() {
         res.send(result)
     })
 
-    app.get('/assignment',async(req,res)=>{
+    app.get('/assignment',logger,verifyToken, async(req,res)=>{
         // const email =req.query.email
-        console.log('inside application cookie',req.cookies);
+
+        // console.log('inside application cookie',req.cookies);
+
+        // if(email !==req.decoded.email){
+        //   return res.status(403).send({message:'forbidden access'})
+        // }
+        // console.log(email)
+
         // const query ={
         //     applicant:email
         // }
@@ -125,6 +167,7 @@ async function run() {
       const result = await assignmentCollection.insertOne(newTree);
       res.send(result);
     });
+    
 
     // update data
     app.get("/assignment/:id", async (req, res) => {
