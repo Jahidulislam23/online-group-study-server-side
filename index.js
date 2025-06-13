@@ -2,18 +2,18 @@ const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 const app = express();
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 const port = process.env.PORT ||3000;
 require("dotenv").config();
 
 // middleware
-app.use(cors());
-app.use(express.json())
-
-// pass: Ne1V8tK93b8BOK2N
-// nam:category_DBUser
-
-
-
+app.use(cors({
+    origin:['http://localhost:5173'],
+    credentials:true
+}));
+app.use(express.json());
+app.use(cookieParser());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jgx1gaf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -34,6 +34,18 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
+    // jwt token related api
+
+    app.post('/jwt',async(req,res)=>{
+        const userData = req.body;
+        const token = jwt.sign(userData, process.env.JWT_ACCESS_SECRET,{expiresIn:'1h'})
+        // set the token
+        res.cookie('token',token,{
+            httpOnly:true,
+            secure:false
+        })
+        res.send({token})
+    })
 
     // my assignment ar kaj
     app.get("/assignments/:email", async (req, res) => {
@@ -41,7 +53,7 @@ async function run() {
       const email = req.params.email;
       const query = { email };
       console.log(query);
-      const result = await assignmentCollection.findOne(query).toArray();
+      const result = await assignmentCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -84,6 +96,11 @@ async function run() {
     })
 
     app.get('/assignment',async(req,res)=>{
+        // const email =req.query.email
+        console.log('inside application cookie',req.cookies);
+        // const query ={
+        //     applicant:email
+        // }
         const result = await assignmentCollection.find().toArray()
         res.send(result)
     })
@@ -163,7 +180,7 @@ run().catch(console.dir);
 
 
 app.get('/',(req,res)=>{
-    res.send('simple crud server running')
+    res.send('simple crud server running ')
 });
 
 app.listen(port,()=>{
