@@ -25,7 +25,7 @@ const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
   console.log("cookies in the middleware", token);
   if (!token) {
-    return res.this.status(401).send({ message: "unauthorized access" });
+    return res.status(401).send({ message: "unauthorized access" });
   }
   // verify
   jwt.verify(token, process.env.JWT_ACCESS_SECRET, (error, decoded) => {
@@ -89,7 +89,29 @@ async function run() {
       const result = await assignmentModal.insertOne(newAssignment);
       res.send(result);
     });
-
+      // assignment modal edit er kaj
+    app.put("/assignmentModal/:id",verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id)  };
+      const updateAss = req.body;
+      const options = { upsert: true };
+      const updateDoct = {
+        $set: updateAss,
+      };
+      const result = await assignmentModal.updateOne(
+        filter,
+        updateDoct,
+        options
+      );
+      res.send(result);
+    });
+        // update data
+    app.get("/assignmentModal/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await assignmentModal.findOne(query);
+      res.send(result);
+    });
 //     app.get('/assignmentModal', verifyToken, async (req, res) => {
 //   const userEmail = req.user.email;
 //   const pending = await assignmentModal.find({
@@ -144,7 +166,7 @@ async function run() {
     //  assignment ar edit korar kaj
     app.put("/assignment/:id", async (req, res) => {
       const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
+      const filter = { email:id  };
       const updateAss = req.body;
       const options = { upsert: true };
       const updateDoct = {
@@ -192,7 +214,7 @@ async function run() {
     // });
 
     //  all assignment ar kaj
-    app.get("/assignment", async (req, res) => {
+    app.get("/assignment",logger, verifyToken, async (req, res) => {
       let query = {}
       if(req.query.filterType){
       query = {careLevel: req.query.filterType}
