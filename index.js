@@ -112,33 +112,6 @@ async function run() {
       const result = await assignmentModal.findOne(query);
       res.send(result);
     });
-//     app.get('/assignmentModal', verifyToken, async (req, res) => {
-//   const userEmail = req.user.email;
-//   const pending = await assignmentModal.find({
-//     status: "pending",
-//     examineeEmail: { $ne: userEmail }
-//   });
-//   res.send(pending);
-// });
-
-// app.post('/assignmentModal/:id', verifyToken, async (req, res) => {
-//   const { marksGiven, feedback } = req.body;
-//   const evaluatedBy = req.user.email;
-
-//   const result = await assignmentModal.updateOne(
-//     { _id: req.params.id },
-//     {
-//       $set: {
-//         marksGiven,
-//         feedback,
-//         evaluatedBy,
-//         status: "completed"
-//       }
-//     }
-//   );
-
-//   res.send(result);
-// });
 
     // my assignment ar kaj
     app.get("/assignments/:email", verifyToken, async (req, res) => {
@@ -179,39 +152,7 @@ async function run() {
       );
       res.send(result);
     });
-    // viewDetailsAssignmentPage kico jak add kora
-    // app.put("/viewAssignmentViewDetails/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const filter = { _id: new ObjectId(id) };
-    //   const updateAssignment = req.body;
-    //   const options = { upsert: true };
-    //   const updateDoct = {
-    //     $set: updateAssignment,
-    //   };
-    //   const result = await assignmentCollection.updateOne(
-    //     filter,
-    //     updateDoct,
-    //     options
-    //   );
-    //   res.send(result);
-    // });
-
-    // app.get("/assignment", logger, verifyToken, async (req, res) => {
-    //   // const email =req.query.email
-
-    //   // console.log('inside application cookie',req.cookies);
-
-    //   // if(email !==req.decoded.email){
-    //   //   return res.status(403).send({message:'forbidden access'})
-    //   // }
-    //   // console.log(email)
-
-    //   // const query ={
-    //   //     applicant:email
-    //   // }
-    //   const result = await assignmentCollection.find().toArray();
-    //   res.send(result);
-    // });
+    
 
     //  all assignment ar kaj
     app.get("/assignment", async (req, res) => {
