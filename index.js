@@ -10,7 +10,7 @@ require("dotenv").config();
 // middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173","https://gregarious-lamington-ac334d.netlify.app","https://assignment-11-9a530.web.app"],
     credentials: true,
   })
 );
@@ -60,7 +60,6 @@ async function run() {
       .db("assignmentDB")
       .collection("assignmentModal");
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
 
     // jwt token related api
 
@@ -72,7 +71,8 @@ async function run() {
       // set the token
       res.cookie("token", token, {
         httpOnly: true,
-        secure: false,
+        secure: true,
+        sameSite:'none'
       });
       res.send({ token });
     });
@@ -105,7 +105,7 @@ async function run() {
       );
       res.send(result);
     });
-        // update data
+        // update modal  data
     app.get("/assignmentModal/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -166,7 +166,7 @@ async function run() {
     //  assignment ar edit korar kaj
     app.put("/assignment/:id", async (req, res) => {
       const id = req.params.id;
-      const filter = { email:id  };
+      const filter = { _id: new ObjectId(id)  };
       const updateAss = req.body;
       const options = { upsert: true };
       const updateDoct = {
@@ -180,21 +180,21 @@ async function run() {
       res.send(result);
     });
     // viewDetailsAssignmentPage kico jak add kora
-    app.put("/viewAssignmentViewDetails/:id", async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updateAssignment = req.body;
-      const options = { upsert: true };
-      const updateDoct = {
-        $set: updateAssignment,
-      };
-      const result = await assignmentCollection.updateOne(
-        filter,
-        updateDoct,
-        options
-      );
-      res.send(result);
-    });
+    // app.put("/viewAssignmentViewDetails/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const filter = { _id: new ObjectId(id) };
+    //   const updateAssignment = req.body;
+    //   const options = { upsert: true };
+    //   const updateDoct = {
+    //     $set: updateAssignment,
+    //   };
+    //   const result = await assignmentCollection.updateOne(
+    //     filter,
+    //     updateDoct,
+    //     options
+    //   );
+    //   res.send(result);
+    // });
 
     // app.get("/assignment", logger, verifyToken, async (req, res) => {
     //   // const email =req.query.email
@@ -214,7 +214,7 @@ async function run() {
     // });
 
     //  all assignment ar kaj
-    app.get("/assignment",logger, verifyToken, async (req, res) => {
+    app.get("/assignment", async (req, res) => {
       let query = {}
       if(req.query.filterType){
       query = {careLevel: req.query.filterType}
